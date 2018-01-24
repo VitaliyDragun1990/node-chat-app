@@ -19,16 +19,36 @@ let io = socketIO(server);
 io.on('connection', (socket) => {
     console.log('New user connected');
 
+    // emit custom events
+
+    socket.emit('newMessage', {
+        from: 'Admin',
+        text: 'Welcome to the chat app',
+        createdAt: new Date().getTime()
+    });
+
+    socket.broadcast.emit('newMessage', {
+        from: 'Admin',
+        text: 'New user joined',
+        createdAt: new Date().getTime()
+    });
+
     // listen to custom events
 
     socket.on('createMessage', function (message) {
         console.log('createMessage', message);
-        // emit event to all connected users
+       // emit event to all connected users
         io.emit('newMessage', {
             from: message.from,
             text: message.text,
             createdAt: new Date().getTime()
         });
+        // broadcast message
+        // socket.broadcast.emit('newMessage', {
+        //     from: message.from,
+        //     text: message.text,
+        //     createdAt: new Date().getTime()
+        // });
     });
 
     socket.on('disconnect', () => {
