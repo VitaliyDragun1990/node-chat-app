@@ -19,6 +19,22 @@ let io = socketIO(server);
 io.on('connection', (socket) => {
     console.log('New user connected');
 
+    // emit custom event
+
+    socket.emit('newMessage', {
+       from: 'jack@example.com',
+       text: 'Hello there.',
+       createdAt: new Date().getTime()
+    });
+
+    // listen to custom events
+
+    socket.on('createMessage', function (message) {
+        console.log('createMessage', message);
+        message['createdAt'] = new Date().getTime();
+       socket.emit('newMessage', message);
+    });
+
     socket.on('disconnect', () => {
         console.log('Client disconnected')
     });
