@@ -19,20 +19,16 @@ let io = socketIO(server);
 io.on('connection', (socket) => {
     console.log('New user connected');
 
-    // emit custom event
-
-    socket.emit('newMessage', {
-       from: 'jack@example.com',
-       text: 'Hello there.',
-       createdAt: new Date().getTime()
-    });
-
     // listen to custom events
 
     socket.on('createMessage', function (message) {
         console.log('createMessage', message);
-        message['createdAt'] = new Date().getTime();
-       socket.emit('newMessage', message);
+        // emit event to all connected users
+        io.emit('newMessage', {
+            from: message.from,
+            text: message.text,
+            createdAt: new Date().getTime()
+        });
     });
 
     socket.on('disconnect', () => {
@@ -45,7 +41,7 @@ app.use(express.static(publicPath));
 
 // start server, listening on port 3000
 server.listen(port, () => {
-   console.log(`Server is up on port ${port}`);
+    console.log(`Server is up on port ${port}`);
 });
 
 
