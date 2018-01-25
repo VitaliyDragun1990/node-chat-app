@@ -29,10 +29,11 @@ io.on('connection', (socket) => {
 
     // listen to custom events
 
-    socket.on('createMessage', function (message) {
+    socket.on('createMessage', (message, callback) => {
         console.log('createMessage', message);
        // emit event to all connected users
         io.emit('newMessage', generateMessage(message.from, message.text));
+        callback('This is from the server.');
     });
 
     socket.on('disconnect', () => {
