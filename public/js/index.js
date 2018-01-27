@@ -1,6 +1,23 @@
 // try to connect to the server wia websocket and get a client socket back
 let socket = io();
 
+// define auto-scrolling algorithm for chat window
+function scrollToBottom () {
+    // Selectors
+    let messages = jQuery('#messages');
+    let newMessage = messages.children('li:last-child');
+    // Heights
+    let clientHeight = messages.prop('clientHeight');
+    let scrollTop = messages.prop('scrollTop');
+    let scrollHeight = messages.prop('scrollHeight');
+    let newMessageHeight = newMessage.innerHeight();
+    let lastMessageHeight = newMessage.prev().innerHeight();
+
+    if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
+        messages.scrollTop(scrollHeight);
+    }
+}
+
 socket.on('connect', function () {
     console.log('Connected to server');
 });
@@ -25,6 +42,9 @@ socket.on('newMessage', function (message) {
 
     // append rendered template to our message list
     jQuery('#messages').append(html);
+
+    // check whether we need to scroll down chat window a bit or not
+    scrollToBottom();
 });
 
 // get new message from server containing location url
@@ -42,6 +62,9 @@ socket.on('newLocationMessage', function (message) {
 
     // append rendered template to our message list
     jQuery('#messages').append(html);
+
+    // check whether we need to scroll down chat window a bit or not
+    scrollToBottom();
 });
 
 /*************** LISTEN TO DOM EVENTS FROM UI ELEMENTS *****************/
