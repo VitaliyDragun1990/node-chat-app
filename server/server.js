@@ -21,13 +21,13 @@ let io = socketIO(server);
 io.on('connection', (socket) => {
     console.log('New user connected');
 
-    // emit custom events
+    /*************** EMIT CUSTOM EVENTS TO CLIENTS *****************/
 
     socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
 
     socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined'));
 
-    // listen to custom events
+    /*************** LISTEN TO CUSTOM EVENTS FROM CLIENT *****************/
 
     socket.on('createMessage', (message, callback) => {
         console.log('createMessage', message);
@@ -41,6 +41,7 @@ io.on('connection', (socket) => {
         io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude));
     });
 
+    /*--------------------------------------------------------------*/
     socket.on('disconnect', () => {
         console.log('Client disconnected')
     });
