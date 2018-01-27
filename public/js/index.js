@@ -13,30 +13,35 @@ socket.on('disconnect', function () {
 
 // get new message from server
 socket.on('newMessage', function (message) {
-    // create formatted time string with moment
     let formattedTime = moment(message.createdAt).format('h:mm a');
-    let li = jQuery('<li></li>');
-    li.text(`${message.from} ${formattedTime}: ${message.text}`);
+    // get html content of <script> element contained our mustache template
+    let template = jQuery('#message-template').html();
+    // render it with our variables using mustache
+    let html = Mustache.render(template, {
+        text: message.text,
+        from: message.from,
+        createdAt: formattedTime
+    });
 
-    jQuery('#messages').append(li);
+    // append rendered template to our message list
+    jQuery('#messages').append(html);
 });
 
 // get new message from server containing location url
 socket.on('newLocationMessage', function (message) {
     // create formatted time string with moment
     let formattedTime = moment(message.createdAt).format('h:mm a');
-    // create <li> with jQuery
-    let li = jQuery('<li></li>');
-    // create <a> with jQuery
-    let a = jQuery('<a target="_blank">My current location</a>');
-    // set text for <li>
-    li.text(`${message.from} ${formattedTime}: `);
-    // set link location to <a>
-    a.attr('href', message.url);
-    // append <a> to <li> and <li> to <ol>
-    li.append(a);
-    jQuery('#messages').append(li);
+    // get html content of <script> element contained our mustache template
+    let template = jQuery('#location-message-template').html();
+    // render it with our variables using mustache
+    let html = Mustache.render(template, {
+       from: message.from,
+       url: message.url,
+       createdAt: formattedTime
+    });
 
+    // append rendered template to our message list
+    jQuery('#messages').append(html);
 });
 
 /*************** LISTEN TO DOM EVENTS FROM UI ELEMENTS *****************/
