@@ -30,6 +30,7 @@ socket.on('disconnect', function () {
 
 // get new message from server
 socket.on('newMessage', function (message) {
+    // create formatted time string with moment.js
     let formattedTime = moment(message.createdAt).format('h:mm a');
     // get html content of <script> element contained our mustache template
     let template = jQuery('#message-template').html();
@@ -49,7 +50,7 @@ socket.on('newMessage', function (message) {
 
 // get new message from server containing location url
 socket.on('newLocationMessage', function (message) {
-    // create formatted time string with moment
+    // create formatted time string with moment.js
     let formattedTime = moment(message.createdAt).format('h:mm a');
     // get html content of <script> element contained our mustache template
     let template = jQuery('#location-message-template').html();
