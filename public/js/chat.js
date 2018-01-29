@@ -19,7 +19,19 @@ function scrollToBottom () {
 }
 
 socket.on('connect', function () {
-    console.log('Connected to server');
+    // grab query parameters from url string
+    let params = jQuery.deparam(window.location.search);
+
+    // emit 'join' event to server for setting up a room
+    socket.emit('join', params, function (err) {
+        // if there is an error - redirect user to join page
+       if (err) {
+           alert(err);
+           window.location.href = '/';
+       } else {
+           console.log('No error');
+       }
+    });
 });
 
 socket.on('disconnect', function () {
@@ -27,6 +39,17 @@ socket.on('disconnect', function () {
 });
 
 /*************** LISTEN TO CUSTOM EVENTS FROM SERVER *****************/
+
+// receive list of user's names when a new user joined to same room as current user
+socket.on('updateUserList', function (users) {
+    let ol = jQuery('<ol></ol>');
+
+    users.forEach(function (user) {
+        ol.append(jQuery('<li></li>').text(user));
+    });
+
+    jQuery('#users').html(ol);
+});
 
 // get new message from server
 socket.on('newMessage', function (message) {

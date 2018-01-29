@@ -4,6 +4,8 @@ const express = require('express');
 const socketIO = require('socket.io');
 
 const {generateMessage, generateLocationMessage} = require('./utils/message');
+const {isRealString} = require('./utils/validation');
+const {Users} = require('./utils/users');
 
 // create variable containing path to our index.html file
 const publicPath = path.join(__dirname, '../public');
@@ -16,22 +18,46 @@ const app = express();
 let server = http.createServer(app);
 // configure the server to use socketIO
 let io = socketIO(server);
+// create users instance to store all users connected to the server
+let users = new Users();
 
-// register an event listener
+// register an event listener for incoming 'connection' event from joined client
 io.on('connection', (socket) => {
     console.log('New user connected');
 
     /*************** EMIT CUSTOM EVENTS TO CLIENTS *****************/
 
-    socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
-
-    socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined'));
 
     /*************** LISTEN TO CUSTOM EVENTS FROM CLIENT *****************/
 
+    socket.on('join', (params, callback) => {
+        // check if there are all required parameters
+        if (!isRealString(params.name) || !isRealString(params.room)) {
+            return callback('Name and room name are required.');
+        }
+        // joins a room which name is provided in the params.room property
+        socket.join(params['room']);
+        // remove user from any potential previous room
+        users.removeUser(socket.id);
+        // add new joined user to the users collection
+        users.addUser(socket.id, params['name'], params['room']);
+
+        // living specific room
+        // socket.leave(params['room']);
+
+        // emit message to all users in a specific room
+        io.to(params['room']).emit('updateUserList', users.getUserList(params['room']));
+        // send message to current user
+        socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
+        // send message to all connected users in a specific room, except current user
+        socket.broadcast.to(params['room'])
+            .emit('newMessage', generateMessage('Admin', `${params['name']} has joined.`));
+        callback();
+    });
+
     socket.on('createMessage', (message, callback) => {
         console.log('createMessage', message);
-       // emit event to all connected users
+        // emit event to all connected users
         io.emit('newMessage', generateMessage(message.from, message.text));
         callback();
     });
@@ -43,7 +69,15 @@ io.on('connection', (socket) => {
 
     /*--------------------------------------------------------------*/
     socket.on('disconnect', () => {
-        console.log('Client disconnected')
+        // remove user from user collections on user's disconnect
+        let user = users.removeUser(socket.id);
+
+        if (user) {
+            // send new user list without disconnected user
+            io.to(user.room).emit('updateUserList', users.getUserList(user.room));
+            // notify other users in the same room that user left
+            io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} has left.`));
+        }
     });
 });
 
