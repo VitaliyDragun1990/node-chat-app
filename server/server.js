@@ -56,15 +56,24 @@ io.on('connection', (socket) => {
     });
 
     socket.on('createMessage', (message, callback) => {
-        console.log('createMessage', message);
-        // emit event to all connected users
-        io.emit('newMessage', generateMessage(message.from, message.text));
+        let user = users.getUser(socket.id);
+
+        if (user && isRealString(message.text)) {
+            // emit event to all connected users
+            io.to(user.room).emit('newMessage', generateMessage(user.name, message.text));
+        }
+
         callback();
     });
 
     socket.on('createLocationMessage', (coords) => {
-        // generate new message with location url
-        io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude));
+        let user = users.getUser(socket.id);
+
+        if (user) {
+            // generate new message with location url
+            io.to(user.room)
+                .emit('newLocationMessage', generateLocationMessage(user.name, coords.latitude, coords.longitude));
+        }
     });
 
     /*--------------------------------------------------------------*/

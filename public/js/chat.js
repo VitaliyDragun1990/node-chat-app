@@ -103,7 +103,6 @@ jQuery('#message-form').on('submit', function (e) {
 
     // emit custom event via socket
     socket.emit('createMessage', {
-        from: 'User',
         text: messageTextbox.val()
     }, function () {
         messageTextbox.val(''); // clean input field value when server get the message
