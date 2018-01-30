@@ -30,28 +30,41 @@ io.on('connection', (socket) => {
 
     /*************** LISTEN TO CUSTOM EVENTS FROM CLIENT *****************/
 
+    socket.on('getRoomList', (callback) => {
+       callback(users.getRoomList());
+    });
+
     socket.on('join', (params, callback) => {
         // check if there are all required parameters
         if (!isRealString(params.name) || !isRealString(params.room)) {
             return callback('Name and room name are required.');
         }
+        let name = params.name.trim();
+        // check if username is unique
+        if (users.getUsernameList().indexOf(name) !== -1) {
+            return callback(`Sorry, name ${name} is already taken. Please choose another one.`)
+        }
+
+        // make sure that room name is case insensitive
+        let room = params.room.trim().toLowerCase();
+
         // joins a room which name is provided in the params.room property
-        socket.join(params['room']);
+        socket.join(room);
         // remove user from any potential previous room
         users.removeUser(socket.id);
         // add new joined user to the users collection
-        users.addUser(socket.id, params['name'], params['room']);
+        users.addUser(socket.id, name, room);
 
         // living specific room
         // socket.leave(params['room']);
 
         // emit message to all users in a specific room
-        io.to(params['room']).emit('updateUserList', users.getUserList(params['room']));
+        io.to(room).emit('updateUserList', users.getUserList(room));
         // send message to current user
         socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
         // send message to all connected users in a specific room, except current user
-        socket.broadcast.to(params['room'])
-            .emit('newMessage', generateMessage('Admin', `${params['name']} has joined.`));
+        socket.broadcast.to(room)
+            .emit('newMessage', generateMessage('Admin', `${name} has joined.`));
         callback();
     });
 

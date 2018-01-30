@@ -80,4 +80,17 @@ describe('Users', () => {
 
         expect(foundUser).toBeFalsy();
     });
+
+    it('should return list of rooms', () => {
+       let rooms = users.getRoomList();
+
+       expect(rooms.length).toBe(2);
+    });
+
+    it('should return list of usernames', () => {
+       let usernames = users.getUsernameList();
+
+       expect(usernames.length).toBe(3);
+       expect(usernames).toContain("Mike");
+    });
 });

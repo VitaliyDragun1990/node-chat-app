@@ -28,6 +28,15 @@ class Users {
         let users = this.users.filter(user => user.room === room);
         return users.map(user => user.name);
     }
+
+    getRoomList() {
+        return this.users.map(user => user.room).filter((room, index, array) => index === array.indexOf(room));
+    }
+
+    getUsernameList() {
+        return this.users.map(user => user.name).filter((name, index, array) => index === array.indexOf(name));
+    }
+
 }
 
 module.exports = {Users};

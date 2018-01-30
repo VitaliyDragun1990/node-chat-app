@@ -22,10 +22,21 @@
             <label for="room">Room name</label>
             <input type="text" id="room" name="room">
         </div>
+        <div id="selectGroup" class="form-field" hidden>
+            <label for="activeRooms">Active rooms</label>
+            <select id="activeRooms"></select>
+        </div>
         <div class="form-field">
             <button>Join</button>
         </div>
     </form>
 </div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/libs/jquery-3.3.1.min.js"></script>
+<script src="/js/libs/moment.js"></script>
+<script src="/js/libs/mustache.js"></script>
+<script src="/js/libs/deparam.js"></script>
+<script src="/js/index.js"></script>
 </body>
 </html>
